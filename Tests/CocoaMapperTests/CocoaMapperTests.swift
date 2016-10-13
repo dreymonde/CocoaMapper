@@ -72,6 +72,29 @@ extension Test1 : Mappable {
     }
 }
 
+struct BatmanMovie {
+    let year: Int
+    let title: String
+    
+    enum Keys : String, IndexPathElement {
+        case year, title
+    }
+}
+
+extension BatmanMovie : InMappable {
+    init<Source : InMap>(mapper: InMapper<Source, Keys>) throws {
+        self.year = try mapper.map(from: .year)
+        self.title = try mapper.map(from: .title)
+    }
+}
+
+extension BatmanMovie : OutMappable {
+    func outMap<Destination : OutMap>(mapper: inout OutMapper<Destination, BatmanMovie.Keys>) throws {
+        try mapper.map(self.year, to: .year)
+        try mapper.map(self.title, to: .title)
+    }
+}
+
 class CocoaMapperTests: XCTestCase {
     
     func testCocoaMapper() throws {
@@ -102,6 +125,16 @@ class CocoaMapperTests: XCTestCase {
         XCTAssertEqual(backTest.enumNest, test1.enumNest)
         XCTAssertEqual(backTest.enumNests, test1.enumNests)
         dump(backTest)
+    }
+    
+    func testBatmanMovie() throws {
+        let dict: [String: Any] = [
+            "year": 2008,
+            "title": "The Dark Knight"
+        ]
+        let theDarkKnightMovie = try BatmanMovie(from: dict)
+        let tdkDict: [String: Any] = try theDarkKnightMovie.map()
+        print(tdkDict)
     }
 
 //    static var allTests : [(String, (CocoaMapperTests) -> () throws -> Void)] {
