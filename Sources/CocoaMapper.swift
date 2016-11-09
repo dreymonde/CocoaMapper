@@ -10,8 +10,8 @@ extension CocoaAny : InMap {
         return value as? T
     }
     
-    func get(at indexPath: IndexPathElement) -> CocoaAny? {
-        switch indexPath.indexPathValue {
+    func get(at indexPath: IndexPathValue) -> CocoaAny? {
+        switch indexPath {
         case .key(let key):
             if let dict = value as? [String: Any] {
                 return dict[key].map(CocoaAny.init)
@@ -61,9 +61,9 @@ public enum CocoaOutMappingError : Error {
 
 extension CocoaAny : OutMap {
     
-    mutating func set(_ map: CocoaAny, at indexPath: IndexPathElement) throws {
+    mutating func set(_ map: CocoaAny, at indexPath: IndexPathValue) throws {
         let newValue = map.value
-        switch indexPath.indexPathValue {
+        switch indexPath {
         case .key(let key):
             if var dict = value as? [String: Any] {
                 dict[key] = newValue
@@ -116,7 +116,7 @@ extension InMappable {
     
     /// Creates instance from `dict`.
     public init(from dict: [String: Any]) throws {
-        let mapper = InMapper<CocoaAny, Keys>(of: .init(value: dict))
+        let mapper = InMapper<CocoaAny, MappingKeys>(of: .init(value: dict))
         try self.init(mapper: mapper)
     }
     
@@ -135,8 +135,8 @@ extension BasicInMappable {
 extension InMappableWithContext {
     
     /// Creates instance from `dict` using given context.
-    public init(from dict: [String: Any], withContext context: Context) throws {
-        let mapper = ContextualInMapper<CocoaAny, Keys, Context>(of: .init(value: dict), context: context)
+    public init(from dict: [String: Any], withContext context: MappingContext) throws {
+        let mapper = ContextualInMapper<CocoaAny, MappingKeys, MappingContext>(of: .init(value: dict), context: context)
         try self.init(mapper: mapper)
     }
     
@@ -152,7 +152,7 @@ extension OutMappable {
     ///
     /// - returns: `[String: Any]` dictionary created from `self`.
     public func map() throws -> [String: Any] {
-        var mapper = OutMapper<CocoaAny, Keys>()
+        var mapper = OutMapper<CocoaAny, MappingKeys>()
         try outMap(mapper: &mapper)
         if let dict = mapper.destination.value as? [String: Any] {
             return dict
@@ -192,8 +192,8 @@ extension OutMappableWithContext {
     /// - throws: `OutMapperError`.
     ///
     /// - returns: `[String: Any]` dictionary created from `self`.
-    public func map(withContext context: Context) throws -> [String: Any] {
-        var mapper = ContextualOutMapper<CocoaAny, Keys, Context>(context: context)
+    public func map(withContext context: MappingContext) throws -> [String: Any] {
+        var mapper = ContextualOutMapper<CocoaAny, MappingKeys, MappingContext>(context: context)
         try outMap(mapper: &mapper)
         if let dict = mapper.destination.value as? [String: Any] {
             return dict
