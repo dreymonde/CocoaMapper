@@ -73,25 +73,28 @@ extension Test1 : Mappable {
 }
 
 struct BatmanMovie {
-    let year: Int
+    let rating: Int
     let title: String
+    let releaseDate: Date
     
-    enum Keys : String, IndexPathElement {
-        case year, title
+    enum MappingKeys : String, IndexPathElement {
+        case rating, title, releaseDate
     }
 }
 
 extension BatmanMovie : InMappable {
-    init<Source : InMap>(mapper: InMapper<Source, Keys>) throws {
-        self.year = try mapper.map(from: .year)
+    init<Source : InMap>(mapper: InMapper<Source, MappingKeys>) throws {
+        self.rating = try mapper.map(from: .rating)
         self.title = try mapper.map(from: .title)
+        self.releaseDate = try mapper.unsafe_map(from: .releaseDate)
     }
 }
 
 extension BatmanMovie : OutMappable {
-    func outMap<Destination : OutMap>(mapper: inout OutMapper<Destination, BatmanMovie.Keys>) throws {
-        try mapper.map(self.year, to: .year)
+    func outMap<Destination : OutMap>(mapper: inout OutMapper<Destination, MappingKeys>) throws {
+        try mapper.map(self.rating, to: .rating)
         try mapper.map(self.title, to: .title)
+        try mapper.unsafe_map(self.releaseDate, to: .releaseDate)
     }
 }
 
@@ -129,8 +132,9 @@ class CocoaMapperTests: XCTestCase {
     
     func testBatmanMovie() throws {
         let dict: [String: Any] = [
-            "year": 2008,
-            "title": "The Dark Knight"
+            "rating": 4,
+            "title": "The Dark Knight",
+            "releaseDate": Date(),
         ]
         let theDarkKnightMovie = try BatmanMovie(from: dict)
         let tdkDict: [String: Any] = try theDarkKnightMovie.map()
