@@ -47,7 +47,7 @@ let tdkDict: [String: Any] = try theDarkKnightMovie.map()
 
 ```
 
-## Note on "Plist date types"
+## Note on "Plist data types"
 
 `[String: Any]` is widely used in a lot of different places in Cocoa API. Remember that if you're using it as a "plist dictionary", you can safely put `Date` (ex-`NSDate`) and `Data` (ex-`NSData`) in it using `unsafe_map`/`unsafe_mapArray` functions.
 
